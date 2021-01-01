@@ -1,0 +1,12 @@
+[Unit]
+Description=Web service that allows toggling of pihole group
+After=network.target
+
+[Service]
+User=pi
+WorkingDirectory=/home/pi/services/pihole-trigger
+ExecStart=/home/pi/services/pihole-trigger/environment/bin/gunicorn -b 0.0.0.0:8000 flask_app:app
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
