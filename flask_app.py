@@ -1,13 +1,13 @@
-from flask import Flask
+from flask import Flask, request
 app = Flask(__name__)
 
 import os
 import sqlite3
 
-def update_database(enabled):
+def update_group(group_name, enabled):
   conn = sqlite3.connect("../pihole/etc-pihole/gravity.db")
   c = conn.cursor()
-  c.execute("update 'group' set enabled = ? where id = 1;", (enabled,))
+  c.execute("update 'group' set enabled = ? where name like ?;", (enabled, "%" + group_name + "%"))
   conn.commit()
   conn.close()
 
@@ -20,6 +20,18 @@ def hello_world():
 
 @app.route("/enable/<int:flag>")
 def enable(flag):
-  update_database(flag)
+  update_group("Kids", flag)
   update_pihole()
   return "Success"
+
+@app.route("/update_group", methods=["POST"])
+def update():
+  group_name = request.args.get('group', '')
+  if group_name == '':
+    return "No group name specified"
+  enabled = int(request.args["enabled"])
+  update_group(group_name, enabled)
+  update_pihole()
+  return "Success"
+  
+
